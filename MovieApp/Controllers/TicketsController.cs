@@ -73,6 +73,7 @@ namespace MovieApp.Controllers
                     .FirstOrDefault();
                 ticket.Id = Guid.NewGuid();
                 ticket.CreatedBy = (EShopApplicationUser?)createdBy;
+                //ticket.Movie = _context.Movies.Find(ticket.MovieId);
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -173,7 +174,6 @@ namespace MovieApp.Controllers
             return _context.Tickets.Any(e => e.Id == id);
         }
 
-        [HttpPost]
         public async Task<IActionResult> AddTicketToOrder(Guid? id)
         {
             if (id == null)
@@ -196,16 +196,21 @@ namespace MovieApp.Controllers
                 Order = user.Order,
                 OrderId = user.Order.Id
             };
-            
-            _context.
+
+            _context.TicketInOrders.Add(to);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddToCartConfirmed(ProductInShoppingCart model)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            _shoppingCartService.addToShoppingConfirmed(model, userId);
-            return View("Index", _productService.GetAllProducts());
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> AddToCartConfirmed(ProductInShoppingCart model)
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+        //    _shoppingCartService.addToShoppingConfirmed(model, userId);
+        //    return View("Index", _productService.GetAllProducts());
+        //}
+
+
     }
 }

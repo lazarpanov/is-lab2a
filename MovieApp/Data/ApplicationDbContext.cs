@@ -13,5 +13,6 @@ namespace MovieApp.Data
         public virtual DbSet<MovieApp.Models.Movie> Movies { get; set; }
         public virtual DbSet<MovieApp.Models.Ticket> Tickets { get; set; }
         public DbSet<MovieApp.Models.Order> Order { get; set; } = default!;
+        public DbSet<MovieApp.Models.TicketInOrder> TicketInOrders { get; set; } = default!;
     }
 }

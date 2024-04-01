@@ -22,7 +22,7 @@ namespace MovieApp.Controllers
         }
 
         // GET: Orders
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
 
@@ -30,6 +30,7 @@ namespace MovieApp.Controllers
                 .Include(z => z.Order)
                 .Include(z => z.Order.TicketInOrders)
                 .Include("Order.TicketInOrders.Ticket")
+                .Include("Order.TicketInOrders.Ticket.Movie")
                 .SingleOrDefault(z => z.Id == userId);
 
             var order = user?.Order;
@@ -171,6 +172,41 @@ namespace MovieApp.Controllers
         private bool OrderExists(Guid id)
         {
             return _context.Order.Any(e => e.Id == id);
+        }
+
+        public async Task<IActionResult> DeleteTicketFromOrders (Guid ticketId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+
+            var user = _context.Users
+                .Include(z => z.Order)
+                .Include(z => z.Order.TicketInOrders)
+                .Include("Order.TicketInOrders.Ticket")
+                .SingleOrDefault(z => z.Id == userId);
+
+            var userOrder = user.Order;
+            var itemToDelete = userOrder.TicketInOrders.Where(z => z.TicketId == ticketId).FirstOrDefault();
+            userOrder.TicketInOrders.Remove(itemToDelete);
+            _context.Update(userOrder);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index", "Orders"); ;
+        }
+
+        public async Task<IActionResult> Order()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+            var loggedInUser = _context.Users
+                .Include(z => z.Order)
+                .Include(z => z.Order.TicketInOrders)
+                .Include("Order.TicketInOrders.Ticket")
+                .SingleOrDefault(z => z.Id == userId);
+
+            loggedInUser.Order.TicketInOrders.Clear();
+            _context.Update(loggedInUser);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index", "Orders");
         }
     }
 }
